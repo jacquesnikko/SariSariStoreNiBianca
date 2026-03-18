@@ -27,7 +27,8 @@ public class ShopManager : MonoBehaviour
     private bool isBoy; 
 
     [Header("Dialogue System")]
-    public GameObject speechBubble; // Drag your Speech Bubble UI object here
+    public GameObject speechBubble; 
+    public TextMeshProUGUI dialogueText;
 
    [Header("Audio System")]
     public AudioSource voiceAudioSource; 
