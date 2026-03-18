@@ -10,7 +10,7 @@ public class ShopManager : MonoBehaviour
     public List<ItemData> inventory; 
 
     [Header("UI Elements")]
-    public TextMeshProUGUI orderListText; // This is now inside the Dialogue Bubble
+    public TextMeshProUGUI orderListText; 
     public TextMeshProUGUI profitText;
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI calculatorTotalText;
@@ -30,7 +30,11 @@ public class ShopManager : MonoBehaviour
     public GameObject speechBubble; 
     public TextMeshProUGUI dialogueText;
 
-   [Header("Audio System")]
+    [Header("Note System")]
+    public TextMeshProUGUI itemsPressedNoteText; // Drag the text on the paper note here
+    private List<string> clickedItemsList = new List<string>(); 
+
+    [Header("Audio System")]
     public AudioSource voiceAudioSource; 
     public AudioClip pabiliBoy; 
     public AudioClip pabiliGirl;
@@ -64,7 +68,6 @@ public class ShopManager : MonoBehaviour
     public float customerYOffset = -1.5f; 
     public float walkSpeed = 2.5f;
 
-
     void Start()
     {
         StartCoroutine(RandomPautangTrigger());
@@ -73,6 +76,7 @@ public class ShopManager : MonoBehaviour
         customerRenderer.color = Color.white;
         if(speechBubble != null) speechBubble.SetActive(false);
     }
+
     IEnumerator RandomPautangTrigger()
     {
         while (!isGameOver)
@@ -84,7 +88,6 @@ public class ShopManager : MonoBehaviour
                 if (calculatorUIScript != null) calculatorUIScript.CloseCalculator();
                 pautangPanel.SetActive(true);
 
-                // [CHANGED] Play Pautang voice based on gender
                 if (voiceAudioSource != null)
                 {
                     AudioClip clipToPlay = isBoy ? pautangBoy : pautangGirl;
@@ -121,13 +124,14 @@ public class ShopManager : MonoBehaviour
 
             yield return StartCoroutine(MoveCustomer(startPos, centerPos)); 
             
-          
+            // Play Voice Acting
             if (voiceAudioSource != null)
             {
                 AudioClip clipToPlay = isBoy ? pabiliBoy : pabiliGirl;
                 if (clipToPlay != null) voiceAudioSource.PlayOneShot(clipToPlay);
             }
 
+            // Show Bubble and Order
             if (speechBubble != null) speechBubble.SetActive(true);
             customerAnimator.Play(isBoy ? "Happy_Boy" : "Happy_Girl");
             
@@ -183,8 +187,8 @@ public class ShopManager : MonoBehaviour
             finalOrderString += pair.Value + " " + pair.Key + "\n";
         }
         
-        // This text now appears in the bubble
-        orderListText.text = finalOrderString;
+        // Show in Speech Bubble
+        if (dialogueText != null) dialogueText.text = finalOrderString;
 
         // Payment logic
         int[] bills = { 20, 50, 100, 200, 500 };
@@ -201,13 +205,54 @@ public class ShopManager : MonoBehaviour
         bayadDisplay.text = "BAYAD: P" + paymentReceived;
     }
 
+    // --- NOTE / BASKET SYSTEM ---
+
     public void SelectItem(ItemData data)
     {
         if (isGameOver || !isCustomerPresent) return;
+
+        // Add to Price
         runningRetailTotal += data.retailPrice;
         runningCostTotal += data.costPrice;
         calculatorTotalText.text = "TOTAL: P" + runningRetailTotal;
+
+        // Add to Note List
+        clickedItemsList.Add(data.itemName);
+        UpdateNoteUI();
     }
+
+    public void ResetPressedItems() // Hook this to your red "X" button
+    {
+        clickedItemsList.Clear();
+        runningRetailTotal = 0;
+        runningCostTotal = 0;
+        
+        UpdateNoteUI();
+        if (calculatorTotalText != null) calculatorTotalText.text = "TOTAL: P0";
+    }
+
+    void UpdateNoteUI()
+    {
+        if (itemsPressedNoteText == null) return;
+        
+        string noteContent = "";
+        Dictionary<string, int> counts = new Dictionary<string, int>();
+
+        foreach (string item in clickedItemsList)
+        {
+            if (counts.ContainsKey(item)) counts[item]++;
+            else counts[item] = 1;
+        }
+
+        foreach (var pair in counts)
+        {
+            noteContent += pair.Value + " " + pair.Key + "\n";
+        }
+
+        itemsPressedNoteText.text = noteContent;
+    }
+
+    // --- CALCULATOR INPUTS ---
 
     public void AddChangeDigit(int digit)
     {
@@ -244,7 +289,7 @@ public class ShopManager : MonoBehaviour
     IEnumerator CustomerDeparture(bool wasHappy)
     {
         isCustomerPresent = false;
-        if (speechBubble != null) speechBubble.SetActive(false); // Hide Bubble
+        if (speechBubble != null) speechBubble.SetActive(false); 
 
         if (!wasHappy)
         {
@@ -265,7 +310,10 @@ public class ShopManager : MonoBehaviour
         runningCostTotal = 0;
         playerTypedChange = 0;
         paymentReceived = 0;
-        orderListText.text = "";
+        
+        // Reset the Note List
+        clickedItemsList.Clear();
+        if (itemsPressedNoteText != null) itemsPressedNoteText.text = "";
         
         if (calculatorTotalText != null) calculatorTotalText.text = "TOTAL: P0";
         if (inputChangeText != null) inputChangeText.text = "SUKLI: P0";
@@ -284,6 +332,8 @@ public class ShopManager : MonoBehaviour
     }
 
     public void UpdateUI() => profitText.text = "Profit: P" + currentProfit;
+
+    // --- END GAME LOGIC ---
 
     void EndGame()
     {
