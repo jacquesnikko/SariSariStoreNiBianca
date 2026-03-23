@@ -59,10 +59,12 @@ public class ShopManager : MonoBehaviour
     public float timeLeft = 90f; 
     public int currentProfit = 0;
     private int runningRetailTotal = 0; 
+    private int expectedOrderTotal = 0;
     private int runningCostTotal = 0;   
     private int paymentReceived = 0; 
     private int playerTypedChange = 0;
     private bool isGameOver = false;
+    private bool isTimerRunning = false;
 
     [Header("Customer Positioning")]
     public float customerYOffset = -1.5f; 
@@ -103,10 +105,14 @@ public class ShopManager : MonoBehaviour
 
         if (timeLeft > 0)
         {
-            timeLeft -= Time.deltaTime;
-            int minutes = Mathf.FloorToInt(timeLeft / 60);
-            int seconds = Mathf.FloorToInt(timeLeft % 60);
-            timerText.text = string.Format("Timer: {0}:{1:00}", minutes, seconds);
+            // <-- ONLY subtract time if the timer is actively running
+            if (isTimerRunning) 
+            {
+                timeLeft -= Time.deltaTime;
+                int minutes = Mathf.FloorToInt(timeLeft / 60);
+                int seconds = Mathf.FloorToInt(timeLeft % 60);
+                timerText.text = string.Format("Timer: {0}:{1:00}", minutes, seconds);
+            }
         }
         else
         {
@@ -124,7 +130,7 @@ public class ShopManager : MonoBehaviour
 
             yield return StartCoroutine(MoveCustomer(startPos, centerPos)); 
             
-            // Play Voice Acting
+            isTimerRunning = true;
             if (voiceAudioSource != null)
             {
                 AudioClip clipToPlay = isBoy ? pabiliBoy : pabiliGirl;
@@ -162,48 +168,50 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    void GenerateNewOrder()
+   void GenerateNewOrder()
+{
+    if (inventory.Count == 0) return;
+
+    int numberOfItems = Random.Range(1, 4); 
+    expectedOrderTotal = 0; // <-- Reset and track the REAL total here
+    string finalOrderString = "";
+    Dictionary<string, int> orderQuantities = new Dictionary<string, int>();
+
+    for (int i = 0; i < numberOfItems; i++)
     {
-        if (inventory.Count == 0) return;
+        ItemData randomItem = inventory[Random.Range(0, inventory.Count)];
+        expectedOrderTotal += randomItem.retailPrice; // <-- Add to expected total
 
-        int numberOfItems = Random.Range(1, 4); 
-        int totalOrderPrice = 0; 
-        string finalOrderString = "";
-        Dictionary<string, int> orderQuantities = new Dictionary<string, int>();
-
-        for (int i = 0; i < numberOfItems; i++)
-        {
-            ItemData randomItem = inventory[Random.Range(0, inventory.Count)];
-            totalOrderPrice += randomItem.retailPrice;
-
-            if (orderQuantities.ContainsKey(randomItem.itemName)) 
-                orderQuantities[randomItem.itemName]++;
-            else 
-                orderQuantities[randomItem.itemName] = 1;
-        }
-
-        foreach (var pair in orderQuantities)
-        {
-            finalOrderString += pair.Value + " " + pair.Key + "\n";
-        }
-        
-        // Show in Speech Bubble
-        if (dialogueText != null) dialogueText.text = finalOrderString;
-
-        // Payment logic
-        int[] bills = { 20, 50, 100, 200, 500 };
-        int payment = 0;
-        float strategy = Random.value;
-        if (strategy < 0.4f) payment = totalOrderPrice; 
+        if (orderQuantities.ContainsKey(randomItem.itemName)) 
+            orderQuantities[randomItem.itemName]++;
         else 
-        {
-            foreach (int bill in bills) { if (bill >= totalOrderPrice) { payment = bill; break; } }
-            if (strategy > 0.7f) payment += (Random.Range(0, 2) == 0 ? 5 : 10); 
-        }
-        if (payment == 0) payment = 20; 
-        paymentReceived = payment;
-        bayadDisplay.text = "BAYAD: P" + paymentReceived;
+            orderQuantities[randomItem.itemName] = 1;
     }
+
+    foreach (var pair in orderQuantities)
+    {
+        finalOrderString += pair.Value + " " + pair.Key + "\n";
+    }
+    
+    // Show in Speech Bubble
+    if (dialogueText != null) dialogueText.text = finalOrderString;
+
+    // Payment logic
+    int[] bills = { 20, 50, 100, 200, 500 };
+    int payment = 0;
+    float strategy = Random.value;
+    
+    if (strategy < 0.4f) payment = expectedOrderTotal; // <-- Use expectedOrderTotal
+    else 
+    {
+        foreach (int bill in bills) { if (bill >= expectedOrderTotal) { payment = bill; break; } } // <-- Use expectedOrderTotal
+        if (strategy > 0.7f) payment += (Random.Range(0, 2) == 0 ? 5 : 10); 
+    }
+    
+    if (payment == 0) payment = 20; 
+    paymentReceived = payment;
+    bayadDisplay.text = "BAYAD: P" + paymentReceived;
+}
 
     // --- NOTE / BASKET SYSTEM ---
 
@@ -267,30 +275,38 @@ public class ShopManager : MonoBehaviour
         inputChangeText.text = "SUKLI: P" + playerTypedChange;
     }
 
-    public void CheckTransaction()
+   public void CheckTransaction()
+{
+    if (isGameOver || !isCustomerPresent) return;
+    
+    // The correct change should be based on what the customer ACTUALLY ordered
+    int expectedChange = paymentReceived - expectedOrderTotal;
+    
+    // It is only correct if the sukli is right AND they clicked all the right items (totals match)
+    bool isCorrect = (playerTypedChange == expectedChange && runningRetailTotal == expectedOrderTotal);
+
+    if (isCorrect)
     {
-        if (isGameOver || !isCustomerPresent) return;
-        int actualChange = paymentReceived - runningRetailTotal;
-        bool isCorrect = (playerTypedChange == actualChange && runningRetailTotal > 0);
-
-        if (isCorrect)
-            currentProfit += (runningRetailTotal - runningCostTotal);
-        else
-        {
-            currentProfit -= 10;
-            mistakesCount++;
-        }
-
-        StartCoroutine(CustomerDeparture(isCorrect));
-        if (calculatorUIScript != null) calculatorUIScript.CloseCalculator();
-        UpdateUI();
+        // Now it will correctly add the profit of ALL items the customer ordered!
+        currentProfit += (runningRetailTotal - runningCostTotal);
     }
+    else
+    {
+        currentProfit -= 10;
+        mistakesCount++;
+    }
+
+    StartCoroutine(CustomerDeparture(isCorrect));
+    if (calculatorUIScript != null) calculatorUIScript.CloseCalculator();
+    UpdateUI();
+}
 
     IEnumerator CustomerDeparture(bool wasHappy)
     {
         isCustomerPresent = false;
+        isTimerRunning = false;
         if (speechBubble != null) speechBubble.SetActive(false); 
-
+        if (calculatorUIScript != null) calculatorUIScript.CloseCalculator();
         if (!wasHappy)
         {
             customerAnimator.Play(isBoy ? "Angry_Boy" : "Angry_Girl");
