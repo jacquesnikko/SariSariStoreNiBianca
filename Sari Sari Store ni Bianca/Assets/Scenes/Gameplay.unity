@@ -3570,7 +3570,9 @@ MonoBehaviour:
   gameOverPanel: {fileID: 2076589305}
   targetProfit: 150
   slideSpeed: 5
-  stars: []
+  threeStarsUI: {fileID: 1531247921}
+  twoStarsUI: {fileID: 1977386024}
+  oneStarUI: {fileID: 404614948}
   timeLeft: 180
   currentProfit: 0
   customerYOffset: -1.5
@@ -7274,7 +7276,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1531247922
 RectTransform:
   m_ObjectHideFlags: 0

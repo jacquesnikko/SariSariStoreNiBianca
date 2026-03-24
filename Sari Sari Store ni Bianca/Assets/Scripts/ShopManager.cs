@@ -52,7 +52,9 @@ public class ShopManager : MonoBehaviour
     public float slideSpeed = 5f;
 
     [Header("Star System UI")]
-    public GameObject[] stars;
+    public GameObject threeStarsUI; 
+    public GameObject twoStarsUI;   
+    public GameObject oneStarUI;
     private int mistakesCount = 0; 
 
     [Header("Game State")]
@@ -383,18 +385,23 @@ public class ShopManager : MonoBehaviour
 
     void EvaluateStars()
     {
-        foreach (GameObject star in stars) star.SetActive(false);
+        // 1. Turn them all off to start with a clean slate
+        if (threeStarsUI != null) threeStarsUI.SetActive(false);
+        if (twoStarsUI != null) twoStarsUI.SetActive(false);
+        if (oneStarUI != null) oneStarUI.SetActive(false);
+
+        // 2. Turn on the correct group based on how many mistakes were made
         if (mistakesCount == 0)
         {
-            if (stars.Length >= 3) { stars[0].SetActive(true); stars[1].SetActive(true); stars[2].SetActive(true); }
+            if (threeStarsUI != null) threeStarsUI.SetActive(true);
         }
         else if (mistakesCount <= 3)
         {
-            if (stars.Length >= 2) { stars[0].SetActive(true); stars[1].SetActive(true); }
+            if (twoStarsUI != null) twoStarsUI.SetActive(true);
         }
         else
         {
-            if (stars.Length >= 1) { stars[0].SetActive(true); }
+            if (oneStarUI != null) oneStarUI.SetActive(true);
         }
     }
 }
