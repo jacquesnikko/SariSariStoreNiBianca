@@ -31,15 +31,29 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI dialogueText;
 
     [Header("Note System")]
-    public TextMeshProUGUI itemsPressedNoteText; // Drag the text on the paper note here
+    public TextMeshProUGUI itemsPressedNoteText; 
     private List<string> clickedItemsList = new List<string>(); 
 
-    [Header("Audio System")]
+    [Header("Audio System - Voices")]
     public AudioSource voiceAudioSource; 
     public AudioClip pabiliBoy; 
     public AudioClip pabiliGirl;
     public AudioClip pautangBoy;
     public AudioClip pautangGirl;
+
+    [Header("Audio System - Music & SFX")]
+    public AudioSource bgmAudioSource; 
+    public AudioSource sfxAudioSource; 
+    public AudioClip backgroundMusicClip;
+    public AudioClip buttonClickClip;
+
+    // --- NEW AMBIENT AUDIO ADDITIONS HERE ---
+    [Header("Audio System - Ambient Sounds")]
+    public AudioSource jeepneyAudioSource;
+    public AudioSource fanAudioSource;
+    public AudioClip jeepneyClip;
+    public AudioClip fanClip;
+    // ----------------------------------------
 
     [Header("Pautang System")]
     public GameObject pautangPanel;
@@ -74,11 +88,45 @@ public class ShopManager : MonoBehaviour
 
     void Start()
     {
+        // Play main music
+        if (bgmAudioSource != null && backgroundMusicClip != null)
+        {
+            bgmAudioSource.clip = backgroundMusicClip;
+            bgmAudioSource.loop = true; 
+            bgmAudioSource.Play();
+        }
+
+        // --- NEW AMBIENT LOGIC ---
+        // Play jeepney sounds
+        if (jeepneyAudioSource != null && jeepneyClip != null)
+        {
+            jeepneyAudioSource.clip = jeepneyClip;
+            jeepneyAudioSource.loop = true; 
+            jeepneyAudioSource.Play();
+        }
+
+        // Play fan sounds
+        if (fanAudioSource != null && fanClip != null)
+        {
+            fanAudioSource.clip = fanClip;
+            fanAudioSource.loop = true; 
+            fanAudioSource.Play();
+        }
+        // -------------------------
+
         StartCoroutine(RandomPautangTrigger());
         StartCoroutine(CustomerArrivalSequence()); 
         UpdateUI();
         customerRenderer.color = Color.white;
         if(speechBubble != null) speechBubble.SetActive(false);
+    }
+
+    public void PlayClickSound()
+    {
+        if (sfxAudioSource != null && buttonClickClip != null)
+        {
+            sfxAudioSource.PlayOneShot(buttonClickClip);
+        }
     }
 
     IEnumerator RandomPautangTrigger()
@@ -107,7 +155,6 @@ public class ShopManager : MonoBehaviour
 
         if (timeLeft > 0)
         {
-            // <-- ONLY subtract time if the timer is actively running
             if (isTimerRunning) 
             {
                 timeLeft -= Time.deltaTime;
@@ -139,7 +186,6 @@ public class ShopManager : MonoBehaviour
                 if (clipToPlay != null) voiceAudioSource.PlayOneShot(clipToPlay);
             }
 
-            // Show Bubble and Order
             if (speechBubble != null) speechBubble.SetActive(true);
             customerAnimator.Play(isBoy ? "Happy_Boy" : "Happy_Girl");
             
@@ -171,18 +217,18 @@ public class ShopManager : MonoBehaviour
     }
 
    void GenerateNewOrder()
-{
+   {
     if (inventory.Count == 0) return;
 
     int numberOfItems = Random.Range(1, 4); 
-    expectedOrderTotal = 0; // <-- Reset and track the REAL total here
+    expectedOrderTotal = 0; 
     string finalOrderString = "";
     Dictionary<string, int> orderQuantities = new Dictionary<string, int>();
 
     for (int i = 0; i < numberOfItems; i++)
     {
         ItemData randomItem = inventory[Random.Range(0, inventory.Count)];
-        expectedOrderTotal += randomItem.retailPrice; // <-- Add to expected total
+        expectedOrderTotal += randomItem.retailPrice; 
 
         if (orderQuantities.ContainsKey(randomItem.itemName)) 
             orderQuantities[randomItem.itemName]++;
@@ -195,43 +241,37 @@ public class ShopManager : MonoBehaviour
         finalOrderString += pair.Value + " " + pair.Key + "\n";
     }
     
-    // Show in Speech Bubble
     if (dialogueText != null) dialogueText.text = finalOrderString;
 
-    // Payment logic
     int[] bills = { 20, 50, 100, 200, 500 };
     int payment = 0;
     float strategy = Random.value;
     
-    if (strategy < 0.4f) payment = expectedOrderTotal; // <-- Use expectedOrderTotal
+    if (strategy < 0.4f) payment = expectedOrderTotal; 
     else 
     {
-        foreach (int bill in bills) { if (bill >= expectedOrderTotal) { payment = bill; break; } } // <-- Use expectedOrderTotal
+        foreach (int bill in bills) { if (bill >= expectedOrderTotal) { payment = bill; break; } } 
         if (strategy > 0.7f) payment += (Random.Range(0, 2) == 0 ? 5 : 10); 
     }
     
     if (payment == 0) payment = 20; 
     paymentReceived = payment;
     bayadDisplay.text = "BAYAD: P" + paymentReceived;
-}
-
-    // --- NOTE / BASKET SYSTEM ---
+   }
 
     public void SelectItem(ItemData data)
     {
         if (isGameOver || !isCustomerPresent) return;
 
-        // Add to Price
         runningRetailTotal += data.retailPrice;
         runningCostTotal += data.costPrice;
         calculatorTotalText.text = "TOTAL: P" + runningRetailTotal;
 
-        // Add to Note List
         clickedItemsList.Add(data.itemName);
         UpdateNoteUI();
     }
 
-    public void ResetPressedItems() // Hook this to your red "X" button
+    public void ResetPressedItems() 
     {
         clickedItemsList.Clear();
         runningRetailTotal = 0;
@@ -262,8 +302,6 @@ public class ShopManager : MonoBehaviour
         itemsPressedNoteText.text = noteContent;
     }
 
-    // --- CALCULATOR INPUTS ---
-
     public void AddChangeDigit(int digit)
     {
         if (isGameOver || !isCustomerPresent) return;
@@ -278,18 +316,15 @@ public class ShopManager : MonoBehaviour
     }
 
    public void CheckTransaction()
-{
+   {
     if (isGameOver || !isCustomerPresent) return;
     
-    // The correct change should be based on what the customer ACTUALLY ordered
     int expectedChange = paymentReceived - expectedOrderTotal;
     
-    // It is only correct if the sukli is right AND they clicked all the right items (totals match)
     bool isCorrect = (playerTypedChange == expectedChange && runningRetailTotal == expectedOrderTotal);
 
     if (isCorrect)
     {
-        // Now it will correctly add the profit of ALL items the customer ordered!
         currentProfit += (runningRetailTotal - runningCostTotal);
     }
     else
@@ -301,7 +336,7 @@ public class ShopManager : MonoBehaviour
     StartCoroutine(CustomerDeparture(isCorrect));
     if (calculatorUIScript != null) calculatorUIScript.CloseCalculator();
     UpdateUI();
-}
+   }
 
     IEnumerator CustomerDeparture(bool wasHappy)
     {
@@ -329,7 +364,6 @@ public class ShopManager : MonoBehaviour
         playerTypedChange = 0;
         paymentReceived = 0;
         
-        // Reset the Note List
         clickedItemsList.Clear();
         if (itemsPressedNoteText != null) itemsPressedNoteText.text = "";
         
@@ -350,8 +384,6 @@ public class ShopManager : MonoBehaviour
     }
 
     public void UpdateUI() => profitText.text = "Profit: P" + currentProfit;
-
-    // --- END GAME LOGIC ---
 
     void EndGame()
     {
@@ -385,12 +417,10 @@ public class ShopManager : MonoBehaviour
 
     void EvaluateStars()
     {
-        // 1. Turn them all off to start with a clean slate
         if (threeStarsUI != null) threeStarsUI.SetActive(false);
         if (twoStarsUI != null) twoStarsUI.SetActive(false);
         if (oneStarUI != null) oneStarUI.SetActive(false);
 
-        // 2. Turn on the correct group based on how many mistakes were made
         if (mistakesCount == 0)
         {
             if (threeStarsUI != null) threeStarsUI.SetActive(true);
