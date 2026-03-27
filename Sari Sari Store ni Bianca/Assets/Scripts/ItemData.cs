@@ -7,4 +7,3 @@ public class ItemData : ScriptableObject
     public string itemName;
     public int retailPrice;
     public int costPrice;
-}
