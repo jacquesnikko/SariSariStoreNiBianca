@@ -3642,43 +3642,25 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 479f88a039d5e74468a5319519f5d94a, type: 2}
   - {fileID: 11400000, guid: 850ba368bc56aa844ba386de9b41c687, type: 2}
   - {fileID: 11400000, guid: 7497477fd111b9e4daf1fed4f4acd247, type: 2}
-  orderListText: {fileID: 0}
-  profitText: {fileID: 1204721263}
-  timerText: {fileID: 131893841}
-  calculatorTotalText: {fileID: 1431260005}
-  bayadDisplay: {fileID: 186510593}
-  inputChangeText: {fileID: 1156611835}
-  calculatorUIScript: {fileID: 289763877}
   customerRenderer: {fileID: 1840998970}
   customerAnimator: {fileID: 1840998969}
   customerWaitTime: 15
-  speechBubble: {fileID: 1870533348}
-  dialogueText: {fileID: 1757600017}
-  itemsPressedNoteText: {fileID: 1984035380}
   voiceAudioSource: {fileID: 1060858141}
+  bgmAudioSource: {fileID: 1677335929}
+  sfxAudioSource: {fileID: 1070309028}
+  jeepneyAudioSource: {fileID: 1888408527}
+  fanAudioSource: {fileID: 1909693319}
   pabiliBoy: {fileID: 8300000, guid: 633b575ca5b20f246b56c1b0a5b4af3e, type: 3}
   pabiliGirl: {fileID: 8300000, guid: 30945a8076b5539419d127812bbff7ed, type: 3}
   pautangBoy: {fileID: 8300000, guid: 7144fe42faa9ad84f9446ff6b315ea04, type: 3}
   pautangGirl: {fileID: 8300000, guid: c21e507f353e29a41ba6d71cb267eaa9, type: 3}
-  bgmAudioSource: {fileID: 1677335929}
-  sfxAudioSource: {fileID: 1070309028}
   backgroundMusicClip: {fileID: 8300000, guid: 5669911b9192df848a5a78219a6ed1cf, type: 3}
   buttonClickClip: {fileID: 8300000, guid: d226fd37b037cb54da543a9a4fc43cbf, type: 3}
-  jeepneyAudioSource: {fileID: 1888408527}
-  fanAudioSource: {fileID: 1909693319}
   jeepneyClip: {fileID: 8300000, guid: 0a26a3c792d561a40bdd1e9a39f91d12, type: 3}
   fanClip: {fileID: 8300000, guid: 39c94e4adf477c04bac59577d17f00e6, type: 3}
   pautangPanel: {fileID: 259798786}
   chanceToPop: 0.15
-  successPanel: {fileID: 411060051}
-  gameOverPanel: {fileID: 2076589305}
   targetProfit: 150
-  slideSpeed: 5
-  threeStarsUI: {fileID: 1531247921}
-  twoStarsUI: {fileID: 1977386024}
-  oneStarUI: {fileID: 404614948}
-  timeLeft: 180
-  currentProfit: 0
   customerYOffset: -1.5
   walkSpeed: 2.5
 --- !u!4 &562998092
@@ -8210,6 +8192,7 @@ GameObject:
   - component: {fileID: 1660347119}
   - component: {fileID: 1660347118}
   - component: {fileID: 1660347117}
+  - component: {fileID: 1660347121}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -8304,6 +8287,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1660347121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1660347116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d231a09e4a8a7644c8bdbb5b1161fc78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopUIManager
+  orderListText: {fileID: 0}
+  profitText: {fileID: 1204721263}
+  timerText: {fileID: 131893841}
+  calculatorTotalText: {fileID: 1431260005}
+  bayadDisplay: {fileID: 186510593}
+  inputChangeText: {fileID: 1156611835}
+  itemsPressedNoteText: {fileID: 1984035380}
+  dialogueText: {fileID: 1757600017}
+  speechBubble: {fileID: 1870533348}
+  successPanel: {fileID: 411060051}
+  gameOverPanel: {fileID: 2076589305}
+  threeStarsUI: {fileID: 1531247921}
+  twoStarsUI: {fileID: 1977386024}
+  oneStarUI: {fileID: 404614948}
+  slideSpeed: 5
 --- !u!1 &1677335928
 GameObject:
   m_ObjectHideFlags: 0
@@ -10737,7 +10747,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2016894655
@@ -11657,6 +11667,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109647136}
   m_CullTransparentMesh: 1
+--- !u!1 &2120863347
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2120863350}
+  - component: {fileID: 2120863349}
+  - component: {fileID: 2120863348}
+  m_Layer: 0
+  m_Name: Database
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2120863348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120863347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fa0b9b3ffaf56546899b4d3febad6bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ApplicationSaveTrigger
+--- !u!114 &2120863349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120863347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41e25b8fe4849e34a992463d9d8077eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DatabaseManager
+--- !u!4 &2120863350
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120863347}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -620.28326, y: 663.92596, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -11673,3 +11740,4 @@ SceneRoots:
   - {fileID: 1070309029}
   - {fileID: 1888408528}
   - {fileID: 1909693320}
+  - {fileID: 2120863350}
