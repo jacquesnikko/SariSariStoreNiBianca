@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc94822b272fb0247ac16f7ac6c32731, type: 3}
   m_Name: Malboro
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemID: 17
   itemName: Malboro
   retailPrice: 11
   costPrice: 7

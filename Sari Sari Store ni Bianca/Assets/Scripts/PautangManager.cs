@@ -1,14 +1,15 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
-using UnityEngine;
 
+// THIS WAS THE MISSING PIECE!
+// It tells Unity how to build your custom Pautang list in the Inspector.
 [System.Serializable]
 public class PautangScenario
 {
-    public string requestText; // e.g., "Pautang po P500 para sa gatas ng baby."
-    public int profitLoss;    // How much profit you lose (e.g., 500)
-    public float timeGain = 10f; // Seconds gained
+    public string requestText;
+    public int profitLoss;
+    public float timeGain = 10f;
 }
 
 public class PautangManager : MonoBehaviour
@@ -23,7 +24,6 @@ public class PautangManager : MonoBehaviour
 
     void OnEnable()
     {
-        // Pick a random scenario when the panel opens
         if (scenarios.Count > 0)
         {
             currentScenario = scenarios[Random.Range(0, scenarios.Count)];
@@ -33,17 +33,16 @@ public class PautangManager : MonoBehaviour
 
     public void ClickYes()
     {
-        // Reward: Time | Penalty: Profit
-        shopManager.currentProfit -= currentScenario.profitLoss;
-        shopManager.timeLeft += currentScenario.timeGain;
-        
-        shopManager.UpdateUI(); // Refresh the profit display
+        // Alter the PlayerModel directly through the Logic Layer
+        shopManager.currentPlayer.Currency -= currentScenario.profitLoss;
+        shopManager.currentPlayer.RemainingTime += currentScenario.timeGain;
+        shopManager.currentPlayer.isDirty = true;
+
+        // (Optional) If you want the UI to instantly visually update the moment they click Yes,
+        // you would call a method on ShopManager here to broadcast the new profit/time values.
+
         gameObject.SetActive(false);
     }
 
-    public void ClickNo()
-    {
-        // Do nothing, just close
-        gameObject.SetActive(false);
-    }
+    public void ClickNo() => gameObject.SetActive(false);
 }
